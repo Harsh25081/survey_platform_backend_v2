@@ -1,0 +1,580 @@
+{
+  "info": {
+    "_postman_id": "survey-platform-api-v2",
+    "name": "Survey Platform API v2",
+    "description": "Complete API collection for Survey Platform Backend v2 with authentication, surveys, questions, responses, sharing, and analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "{{base_url}}",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('auth_token', response.token);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{user_name}}\",\n  \"email\": \"{{user_email}}\",\n  \"mobile_no\": \"{{user_mobile}}\",\n  \"password\": \"{{user_password}}\",\n  \"role\": \"USER\",\n  \"theme\": \"LIGHT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('auth_token', response.token);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with existing user credentials"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration and login"
+    },
+    {
+      "name": "Surveys",
+      "item": [
+        {
+          "name": "Create Survey",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('survey_id', response.survey.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"{{survey_title}}\",\n  \"description\": \"{{survey_description}}\",\n  \"flow_type\": \"STATIC\",\n  \"survey_send_by\": \"EMAIL\",\n  \"settings\": {\n    \"isAnonymous\": false,\n    \"showProgressBar\": true,\n    \"shuffleQuestions\": false\n  },\n  \"status\": \"DRAFT\",\n  \"scheduled_type\": \"IMMEDIATE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/surveys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys"]
+            },
+            "description": "Create a new survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Surveys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys"]
+            },
+            "description": "Get all surveys for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Survey by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Get a specific survey by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Survey",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Survey Title\",\n  \"description\": \"Updated survey description\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Update an existing survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Survey",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Soft delete a survey"
+          },
+          "response": []
+        }
+      ],
+      "description": "Survey management endpoints"
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Create Question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('question_id', response.question.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"question_type\": \"MCQ\",\n  \"question_text\": \"What is your favorite programming language?\",\n  \"options\": [\"JavaScript\", \"Python\", \"Java\", \"C++\"],\n  \"media\": [],\n  \"categoryId\": \"{{category_id}}\",\n  \"subCategoryId\": \"{{sub_category_id}}\",\n  \"order_index\": 1,\n  \"required\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/questions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions"]
+            },
+            "description": "Create a new question for a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Questions by Survey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/questions/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "survey", "{{survey_id}}"]
+            },
+            "description": "Get all questions for a specific survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_text\": \"Updated question text\",\n  \"options\": [\"Option 1\", \"Option 2\", \"Option 3\"],\n  \"required\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "{{question_id}}"]
+            },
+            "description": "Update an existing question"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Question",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "{{question_id}}"]
+            },
+            "description": "Delete a question"
+          },
+          "response": []
+        }
+      ],
+      "description": "Question management endpoints"
+    },
+    {
+      "name": "Responses",
+      "item": [
+        {
+          "name": "Submit Response",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('response_id', response.response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"user_metadata\": {\n    \"age\": 25,\n    \"location\": \"New York\"\n  },\n  \"answers\": [\n    {\n      \"questionId\": \"{{question_id}}\",\n      \"answer_type\": \"multiple_choice\",\n      \"answer_value\": \"JavaScript\",\n      \"media\": []\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/responses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses"]
+            },
+            "description": "Submit a response to a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Response with Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{share_token}}\",\n  \"user_metadata\": {\n    \"age\": 30,\n    \"location\": \"California\"\n  },\n  \"answers\": [\n    {\n      \"questionId\": \"{{question_id}}\",\n      \"answer_type\": \"multiple_choice\",\n      \"answer_value\": \"Python\",\n      \"media\": []\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/responses/submit-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses", "submit-token"]
+            },
+            "description": "Submit a response using a share token (public access)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Responses by Survey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/responses/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses", "survey", "{{survey_id}}"]
+            },
+            "description": "Get all responses for a specific survey"
+          },
+          "response": []
+        }
+      ],
+      "description": "Response submission and retrieval endpoints"
+    },
+    {
+      "name": "Sharing",
+      "item": [
+        {
+          "name": "Share Survey (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.link) {",
+                  "        const token = response.link.split('/').pop();",
+                  "        pm.environment.set('share_token', token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"type\": \"PUBLIC\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share"]
+            },
+            "description": "Share a survey publicly"
+          },
+          "response": []
+        },
+        {
+          "name": "Share Survey (Personalized)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"type\": \"PERSONALIZED\",\n  \"recipients\": [\n    {\n      \"email\": \"user1@example.com\",\n      \"mobile_no\": \"1234567890\"\n    },\n    {\n      \"email\": \"user2@example.com\",\n      \"mobile_no\": \"0987654321\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share"]
+            },
+            "description": "Share a survey with specific recipients"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Share Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/share/validate/{{share_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share", "validate", "{{share_token}}"]
+            },
+            "description": "Validate a share token and get survey information"
+          },
+          "response": []
+        }
+      ],
+      "description": "Survey sharing and token validation endpoints"
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Survey Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analytics", "survey", "{{survey_id}}"]
+            },
+            "description": "Get overall analytics for a survey including total responses, questions, and completion rate"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Question Analytics (All)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}/questions",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "analytics",
+                "survey",
+                "{{survey_id}}",
+                "questions"
+              ]
+            },
+            "description": "Get analytics for all questions in a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Question Analytics (Specific)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}/questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "analytics",
+                "survey",
+                "{{survey_id}}",
+                "questions",
+                "{{question_id}}"
+              ]
+            },
+            "description": "Get analytics for a specific question"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audience Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}/audience",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "analytics",
+                "survey",
+                "{{survey_id}}",
+                "audience"
+              ]
+            },
+            "description": "Get audience analytics including total audience, responded audience, and response rate"
+          },
+          "response": []
+        }
+      ],
+      "description": "Analytics and reporting endpoints"
+    }
+  ]
+}
