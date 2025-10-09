@@ -82,21 +82,26 @@ model Survey {
   user            User             @relation(fields: [userId], references: [id])
   userId          String
 
-  survey_send_by  SurveySendBy     @default(NONE)
-  flow_type       FlowType         @default(STATIC)
-  settings        Json             @default("{}")
-  status          SurveyStatus     @default(DRAFT)
-  scheduled_date  DateTime?
-  scheduled_type  ScheduleType     @default(IMMEDIATE)
-  is_deleted      Boolean          @default(false)
+  survey_send_by      SurveySendBy     @default(NONE)
+  flow_type           FlowType         @default(STATIC)
+  settings            Json             @default("{}")
+  status              SurveyStatus     @default(DRAFT)
+  scheduled_date      DateTime?
+  scheduled_type      ScheduleType     @default(IMMEDIATE)
+  is_deleted          Boolean          @default(false)
+
+  // New fields for AI generation
+  categoryOfSurvey    String?
+  autoGenerateQuestions Boolean        @default(false)
 
   created_at      DateTime         @default(now())
   updated_at      DateTime         @updatedAt
 
-  questions       Question[]
-  responses       Response[]
-  share_tokens    ShareToken[]
-  audiences       SurveyAudience[]
+  questions           Question[]
+  responses           Response[]
+  share_tokens        ShareToken[]
+  audiences           SurveyAudience[]
+  ai_generated_questions AIGeneratedQuestion[]
 }
 
 model QuestionCategory {
@@ -203,4 +208,27 @@ model SurveyAudience {
   attributes Json     @default("{}")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model AIGeneratedQuestion {
+  id             String      @id @default(uuid())
+  survey         Survey      @relation(fields: [surveyId], references: [id])
+  surveyId       String
+
+  question_type  QuestionType
+  question_text  String
+  options        Json        @default("[]")
+  order_index    Int         @default(0)
+  required       Boolean     @default(true)
+
+  // AI generation metadata
+  ai_prompt      String?     // The prompt used to generate this question
+  ai_model       String?     // The AI model used (e.g., "gpt-3.5-turbo")
+  confidence_score Float?    // AI confidence score if available
+
+  is_approved    Boolean     @default(false)  // Whether user approved this question
+  is_added_to_survey Boolean @default(false)  // Whether this question was added to actual survey
+
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
 }

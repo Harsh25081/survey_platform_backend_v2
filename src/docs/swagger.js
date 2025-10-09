@@ -2,6 +2,7 @@ import swaggerUi from "swagger-ui-express";
 import authDocs from "./authDocs.js";
 import surveyDocs from "./surveyDocs.js";
 import questionDocs from "./questionDocs.js";
+import aiQuestionDocs from "./aiQuestionDocs.js";
 import responseDocs from "./responseDocs.js";
 import shareDocs from "./shareDocs.js";
 import analyticsDocs from "./analyticsDocs.js";
@@ -18,6 +19,7 @@ const swaggerDocument = {
     ...authDocs,
     ...surveyDocs,
     ...questionDocs,
+    ...aiQuestionDocs,
     ...responseDocs,
     ...shareDocs,
     ...analyticsDocs,

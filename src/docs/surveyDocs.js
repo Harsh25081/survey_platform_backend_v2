@@ -106,6 +106,14 @@ export default {
           status: { type: "string", enum: ["DRAFT", "SCHEDULED", "PUBLISHED"] },
           scheduled_date: { type: "string", format: "date-time" },
           scheduled_type: { type: "string", enum: ["IMMEDIATE", "SCHEDULED"] },
+          categoryOfSurvey: {
+            type: "string",
+            description: "Category of the survey for AI question generation",
+          },
+          autoGenerateQuestions: {
+            type: "boolean",
+            description: "Whether to automatically generate questions using AI",
+          },
         },
         required: ["title"],
       },
