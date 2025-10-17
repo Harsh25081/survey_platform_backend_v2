@@ -18,7 +18,7 @@ export const createSurvey = async (req, res) => {
       status,
       scheduled_date,
       scheduled_type,
-      categoryOfSurvey,
+      surveyCategoryId,
       autoGenerateQuestions,
     } = req.body;
 
@@ -26,15 +26,15 @@ export const createSurvey = async (req, res) => {
       data: {
         title,
         description,
-        flow_type: flow_type || "STATIC",
+        userId: req.user.id, // comes from JWT middleware
         survey_send_by: survey_send_by || "NONE",
+        flow_type: flow_type || "STATIC",
         settings: settings || {},
         status: status || "DRAFT",
         scheduled_date: scheduled_date || null,
         scheduled_type: scheduled_type || "IMMEDIATE",
-        categoryOfSurvey: categoryOfSurvey || null,
+        surveyCategoryId: surveyCategoryId || null,
         autoGenerateQuestions: autoGenerateQuestions || false,
-        userId: req.user.id, // comes from JWT middleware
       },
     });
 
@@ -122,6 +122,7 @@ export const createSurvey = async (req, res) => {
         ...(aiGenerationError && { aiGenerationWarning: aiGenerationError }),
       }),
     };
+    console.log("Create Survey Response:", response);
 
     res.status(201).json(response);
   } catch (error) {
