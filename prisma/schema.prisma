@@ -212,14 +212,25 @@ model ResponseAnswer {
   mediaId     String?  
   mediaAsset   MediaAsset?    @relation(fields: [mediaId], references: [id])
 
-  // For saving  Options in answer 
+  // For saving  Options in answer
+  selected_option_ids Json? 
   option    Option[]
   
-
-  gridOptions  Json
+  scaleRatingValue Int?
+    // relation for grid answers
+  grid_answers  GridResponseAnswer[]
 
   submitted_at DateTime       @default(now())
   created_at   DateTime       @default(now())
+}
+
+ model GridResponseAnswer {
+  id               String   @id @default(uuid())
+  responseAnswerId String
+  responseAnswer   ResponseAnswer @relation(fields: [responseAnswerId], references: [id])
+  rowOptionId      String
+  columnOptionId   String
+  selected         Boolean  @default(false) // true if user selected
 }
 
 model ShareToken {

@@ -72,3 +72,17 @@ export const createQuestionCategory = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+/**
+ * Get all categories for survey
+ */
+export const getQuestionCategories = async (req, res) => {
+  try {
+    const categories = await prisma.questionCategory.findMany();
+
+    res.json({ categories });
+  } catch (error) {
+    console.error("Get Categories Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

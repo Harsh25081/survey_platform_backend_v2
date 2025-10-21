@@ -51,9 +51,9 @@ export const createQuestion = async (req, res) => {
 
       switch (categoryType) {
         // Short Answer or Paragraph — store text only
+        // case "short answer":
+        // case "paragraph":
         // Multiple Choice, Checkbox, Dropdown — store text and optional media
-        case "short answer":
-        case "paragraph":
         case "multiple choice":
         case "checkboxes":
         case "dropdown":
@@ -165,6 +165,7 @@ export const getQuestionsBySurvey = async (req, res) => {
     const questions = await prisma.question.findMany({
       where: { surveyId },
       orderBy: { order_index: "asc" },
+      include: { options: true, mediaAsset: true, category: true },
     });
 
     res.json({ questions });
