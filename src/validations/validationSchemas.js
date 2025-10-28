@@ -70,13 +70,13 @@ export const createQuestionValidation = Joi.object({
     .valid("TEXT", "IMAGE", "VIDEO", "AUDIO")
     .required(),
   question_text: Joi.string().min(1).max(500).required(),
-  options: Joi.array().items(Joi.string()).required(),
+  // options: Joi.array().items(Joi.string()).required(),
+  options: Joi.array().optional(),
   mediaId: Joi.string().uuid().optional(),
   categoryId: Joi.string().uuid().required(),
   // subCategoryId: Joi.string().uuid().required(),
   order_index: Joi.number().integer().optional(),
   required: Joi.boolean().optional(),
-  options: Joi.array().optional(),
 });
 
 export const updateQuestionValidation = Joi.object({

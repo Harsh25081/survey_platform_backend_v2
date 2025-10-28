@@ -168,7 +168,7 @@ export const getQuestionsBySurvey = async (req, res) => {
       include: { options: true, mediaAsset: true, category: true },
     });
 
-    res.json({ questions });
+    res.json(questions);
   } catch (error) {
     console.error("Get Questions Error:", error);
     res.status(500).json({ message: "Server error" });
@@ -200,6 +200,10 @@ export const updateQuestion = async (req, res) => {
 export const deleteQuestion = async (req, res) => {
   try {
     const { id } = req.params;
+
+    await prisma.option.deleteMany({
+      where: { questionId: id },
+    });
 
     await prisma.question.delete({ where: { id } });
 

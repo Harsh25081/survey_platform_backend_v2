@@ -1,0 +1,768 @@
+{
+  "info": {
+    "_postman_id": "survey-platform-api-v2-updated",
+    "name": "Survey Platform API v2 - Updated",
+    "description": "Complete API collection for Survey Platform Backend v2 with authentication, surveys, questions, responses, sharing, analytics, and categories",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "survey_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "question_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "share_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('auth_token', response.token);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"mobile_no\": \"9876543210\",\n  \"password\": \"password123\",\n  \"role\": \"USER\",\n  \"theme\": \"LIGHT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('auth_token', response.token);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with existing credentials"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Surveys",
+      "item": [
+        {
+          "name": "Create Survey",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('survey_id', response.survey.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Customer Satisfaction Survey\",\n  \"description\": \"Please rate your experience with our service\",\n  \"flow_type\": \"STATIC\",\n  \"survey_send_by\": \"EMAIL\",\n  \"status\": \"DRAFT\",\n  \"scheduled_type\": \"IMMEDIATE\",\n  \"surveyCategoryId\": null,\n  \"autoGenerateQuestions\": false,\n  \"settings\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/surveys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys"]
+            },
+            "description": "Create a new survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Surveys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys"]
+            },
+            "description": "Get all surveys for the logged-in user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Survey by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Get a specific survey by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Survey",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Survey Title\",\n  \"description\": \"Updated description\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Update an existing survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Survey",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/surveys/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "surveys", "{{survey_id}}"]
+            },
+            "description": "Delete a survey (soft delete)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Create Question",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('question_id', response.question.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"question_type\": \"TEXT\",\n  \"question_text\": \"What is your name?\",\n  \"order_index\": 1,\n  \"required\": true,\n  \"categoryId\": null,\n  \"options\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/questions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions"]
+            },
+            "description": "Create a new question for a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Questions by Survey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/questions/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "survey", "{{survey_id}}"]
+            },
+            "description": "Get all questions for a specific survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_text\": \"Updated question text\",\n  \"required\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "{{question_id}}"]
+            },
+            "description": "Update an existing question"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Question",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "questions", "{{question_id}}"]
+            },
+            "description": "Delete a question"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Responses",
+      "item": [
+        {
+          "name": "Submit Response",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"user_metadata\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\"\n  },\n  \"answers\": [\n    {\n      \"questionId\": \"{{question_id}}\",\n      \"answer_value\": \"My answer\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/responses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses"]
+            },
+            "description": "Submit a response to a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Response with Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{share_token}}\",\n  \"user_metadata\": {\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\"\n  },\n  \"answers\": [\n    {\n      \"questionId\": \"{{question_id}}\",\n      \"answer_value\": \"My answer\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/responses/submit-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses", "submit-token"]
+            },
+            "description": "Submit a response using a share token"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Responses by Survey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/responses/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "responses", "survey", "{{survey_id}}"]
+            },
+            "description": "Get all responses for a specific survey"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI Questions",
+      "item": [
+        {
+          "name": "Get AI Questions by Survey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions", "survey", "{{survey_id}}"]
+            },
+            "description": "Get all AI-generated questions for a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Create AI Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"question_type\": \"TEXT\",\n  \"question_text\": \"What is your feedback?\",\n  \"options\": [],\n  \"order_index\": 1,\n  \"required\": true,\n  \"ai_prompt\": \"Generate a feedback question\",\n  \"ai_model\": \"gpt-3.5-turbo\",\n  \"confidence_score\": 0.95\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions"]
+            },
+            "description": "Create an AI-generated question manually"
+          },
+          "response": []
+        },
+        {
+          "name": "Update AI Question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_text\": \"Updated question text\",\n  \"is_approved\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions", "{{question_id}}"]
+            },
+            "description": "Update an AI-generated question"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete AI Question",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions/{{question_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions", "{{question_id}}"]
+            },
+            "description": "Delete an AI-generated question"
+          },
+          "response": []
+        },
+        {
+          "name": "Approve AI Questions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionIds\": [\"question-uuid-1\", \"question-uuid-2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions/approve?addToSurvey=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions", "approve"],
+              "query": [
+                {
+                  "key": "addToSurvey",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Approve AI-generated questions and optionally add them to survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Add AI Questions to Survey",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionIds\": [\"question-uuid-1\", \"question-uuid-2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-questions/survey/{{survey_id}}/add",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-questions", "survey", "{{survey_id}}", "add"]
+            },
+            "description": "Bulk add approved AI questions to survey"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Share Survey",
+      "item": [
+        {
+          "name": "Share Survey Publicly",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('share_token', response.link.split('/').pop());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"type\": \"PUBLIC\",\n  \"recipients\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share"]
+            },
+            "description": "Share survey publicly"
+          },
+          "response": []
+        },
+        {
+          "name": "Share Survey with Recipients",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": \"{{survey_id}}\",\n  \"type\": \"PERSONALIZED\",\n  \"recipients\": [\n    {\n      \"email\": \"recipient@example.com\",\n      \"mobile_no\": \"9876543210\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/share",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share"]
+            },
+            "description": "Share survey with specific recipients"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Share Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/share/validate/{{share_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "share", "validate", "{{share_token}}"]
+            },
+            "description": "Validate a share token and get survey info"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get Survey Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analytics", "survey", "{{survey_id}}"]
+            },
+            "description": "Get analytics for a specific survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Question Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}/questions",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "analytics",
+                "survey",
+                "{{survey_id}}",
+                "questions"
+              ]
+            },
+            "description": "Get analytics for all questions in a survey"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audience Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/analytics/survey/{{survey_id}}/audience",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "analytics",
+                "survey",
+                "{{survey_id}}",
+                "audience"
+              ]
+            },
+            "description": "Get audience analytics for a survey"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create Survey Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customer Feedback\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories/createSurveyCategory",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "createSurveyCategory"]
+            },
+            "description": "Create a new survey category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Survey Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories/getSurveyCategory",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "getSurveyCategory"]
+            },
+            "description": "Get all survey categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Question Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type_name\": \"Multiple Choice\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories/createQuestionCategory",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "createQuestionCategory"]
+            },
+            "description": "Create a new question category"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Question Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories/getQuestionCategory",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "getQuestionCategory"]
+            },
+            "description": "Get all question categories"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
