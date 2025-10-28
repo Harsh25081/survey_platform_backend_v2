@@ -115,7 +115,9 @@ Authorization: Bearer <your-jwt-token>
     "shuffleQuestions": false
   },
   "status": "DRAFT",
-  "scheduled_type": "IMMEDIATE"
+  "scheduled_type": "IMMEDIATE",
+  "categoryOfSurvey": "Customer Service",
+  "autoGenerateQuestions": true
 }
 ```
 
@@ -137,10 +139,44 @@ Authorization: Bearer <your-jwt-token>
     },
     "status": "DRAFT",
     "scheduled_type": "IMMEDIATE",
+    "categoryOfSurvey": "Customer Service",
+    "autoGenerateQuestions": true,
     "userId": "550e8400-e29b-41d4-a716-446655440000",
     "created_at": "2024-01-01T00:00:00.000Z",
     "updated_at": "2024-01-01T00:00:00.000Z"
-  }
+  },
+  "aiGeneratedQuestions": [
+    {
+      "id": "ai-q-1",
+      "question_type": "RATING",
+      "question_text": "How would you rate your overall experience with our customer service? (1 = Very Poor, 5 = Excellent)",
+      "options": [],
+      "order_index": 1,
+      "required": true,
+      "ai_model": "gpt-3.5-turbo",
+      "confidence_score": 0.8,
+      "is_approved": false,
+      "is_added_to_survey": false
+    },
+    {
+      "id": "ai-q-2",
+      "question_type": "MCQ",
+      "question_text": "How did you first hear about our services?",
+      "options": [
+        "Social Media",
+        "Search Engine",
+        "Word of Mouth",
+        "Advertisement",
+        "Other"
+      ],
+      "order_index": 2,
+      "required": true,
+      "ai_model": "gpt-3.5-turbo",
+      "confidence_score": 0.8,
+      "is_approved": false,
+      "is_added_to_survey": false
+    }
+  ]
 }
 ```
 
@@ -233,7 +269,85 @@ Authorization: Bearer <your-jwt-token>
 }
 ```
 
-### 3. Questions
+### 3. AI Generated Questions
+
+#### Get AI Generated Questions for Survey
+
+- **Endpoint:** `GET /api/ai-questions/survey/{surveyId}`
+- **Authentication:** Required
+- **Description:** Get all AI generated questions for a specific survey
+
+**Response (200 OK):**
+
+```json
+{
+  "aiQuestions": [
+    {
+      "id": "ai-q-1",
+      "surveyId": "550e8400-e29b-41d4-a716-446655440001",
+      "question_type": "RATING",
+      "question_text": "How would you rate your overall experience?",
+      "options": [],
+      "order_index": 1,
+      "required": true,
+      "ai_prompt": "Generate survey questions...",
+      "ai_model": "gpt-3.5-turbo",
+      "confidence_score": 0.8,
+      "is_approved": false,
+      "is_added_to_survey": false,
+      "created_at": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Approve AI Generated Questions
+
+- **Endpoint:** `POST /api/ai-questions/approve?addToSurvey=true`
+- **Authentication:** Required
+- **Description:** Approve AI generated questions and optionally add them to the survey
+
+**Request Body:**
+
+```json
+{
+  "questionIds": ["ai-q-1", "ai-q-2", "ai-q-3"]
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "3 questions approved and added to survey",
+  "approvedCount": 3
+}
+```
+
+#### Add Approved Questions to Survey
+
+- **Endpoint:** `POST /api/ai-questions/survey/{surveyId}/add`
+- **Authentication:** Required
+- **Description:** Add approved AI questions to the actual survey
+
+**Request Body:**
+
+```json
+{
+  "questionIds": ["ai-q-1", "ai-q-2"]
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "2 questions added to survey",
+  "addedCount": 2
+}
+```
+
+### 4. Questions
 
 #### Create Question
 
@@ -852,6 +966,28 @@ class SurveyAPI {
     return this.request("/api/questions", {
       method: "POST",
       body: JSON.stringify(questionData),
+    });
+  }
+
+  // AI Generated Questions
+  async getAIQuestions(surveyId) {
+    return this.request(`/api/ai-questions/survey/${surveyId}`);
+  }
+
+  async approveAIQuestions(questionIds, addToSurvey = false) {
+    return this.request(
+      `/api/ai-questions/approve?addToSurvey=${addToSurvey}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ questionIds }),
+      }
+    );
+  }
+
+  async addAIQuestionsToSurvey(surveyId, questionIds) {
+    return this.request(`/api/ai-questions/survey/${surveyId}/add`, {
+      method: "POST",
+      body: JSON.stringify({ questionIds }),
     });
   }
 

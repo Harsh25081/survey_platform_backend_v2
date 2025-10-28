@@ -25,7 +25,7 @@ export const loginValidation = Joi.object({
 // -------- SURVEY --------
 export const createSurveyValidation = Joi.object({
   title: Joi.string().min(3).max(100).required(),
-  description: Joi.string().max(500).optional(),
+  description: Joi.string().max(500).required(),
   flow_type: Joi.string().valid("STATIC", "INTERACTIVE", "GAME").optional(),
   survey_send_by: Joi.string()
     .valid("WHATSAPP", "EMAIL", "BOTH", "NONE")
@@ -38,6 +38,9 @@ export const createSurveyValidation = Joi.object({
   status: Joi.string().valid("DRAFT", "SCHEDULED", "PUBLISHED").optional(),
   scheduled_date: Joi.date().optional(),
   scheduled_type: Joi.string().valid("IMMEDIATE", "SCHEDULED").optional(),
+  // New fields for AI generation
+  surveyCategoryId: Joi.string().max(100).required(),
+  autoGenerateQuestions: Joi.boolean().optional(),
 });
 
 export const updateSurveyValidation = Joi.object({
@@ -55,27 +58,23 @@ export const updateSurveyValidation = Joi.object({
   status: Joi.string().valid("DRAFT", "SCHEDULED", "PUBLISHED").optional(),
   scheduled_date: Joi.date().optional(),
   scheduled_type: Joi.string().valid("IMMEDIATE", "SCHEDULED").optional(),
+  // New fields for AI generation
+  categoryOfSurvey: Joi.string().max(100).optional(),
+  autoGenerateQuestions: Joi.boolean().optional(),
 });
 
 // -------- QUESTIONS --------
 export const createQuestionValidation = Joi.object({
   surveyId: Joi.string().uuid().required(),
   question_type: Joi.string()
-    .valid("TEXT", "MCQ", "RATING", "IMAGE", "VIDEO", "AUDIO", "FILE", "MATRIX")
+    .valid("TEXT", "IMAGE", "VIDEO", "AUDIO")
     .required(),
   question_text: Joi.string().min(1).max(500).required(),
-  options: Joi.array().items(Joi.string()).required(),
-  media: Joi.array()
-    .items(
-      Joi.object({
-        type: Joi.string(),
-        url: Joi.string(),
-        thumbnail_url: Joi.string().optional(),
-      })
-    )
-    .optional(),
+  // options: Joi.array().items(Joi.string()).required(),
+  options: Joi.array().optional(),
+  mediaId: Joi.string().uuid().optional(),
   categoryId: Joi.string().uuid().required(),
-  subCategoryId: Joi.string().uuid().required(),
+  // subCategoryId: Joi.string().uuid().required(),
   order_index: Joi.number().integer().optional(),
   required: Joi.boolean().optional(),
 });
@@ -86,17 +85,9 @@ export const updateQuestionValidation = Joi.object({
   //   .optional(),
   question_text: Joi.string().min(1).max(500).optional(),
   options: Joi.array().items(Joi.string()).optional(),
-  media: Joi.array()
-    .items(
-      Joi.object({
-        type: Joi.string(),
-        url: Joi.string(),
-        thumbnail_url: Joi.string().optional(),
-      })
-    )
-    .optional(),
+  mediaId: Joi.string().uuid().optional(),
   categoryId: Joi.string().uuid().optional(),
-  subCategoryId: Joi.string().uuid().optional(),
+  // subCategoryId: Joi.string().uuid().optional(),
   order_index: Joi.number().integer().optional(),
   required: Joi.boolean().optional(),
 });
@@ -134,6 +125,37 @@ export const createResponseWithTokenValidation = Joi.object({
       })
     )
     .required(),
+});
+
+// -------- AI GENERATED QUESTIONS --------
+export const createAIGeneratedQuestionValidation = Joi.object({
+  surveyId: Joi.string().uuid().required(),
+  question_type: Joi.string()
+    .valid("TEXT", "MCQ", "RATING", "IMAGE", "VIDEO", "AUDIO", "FILE", "MATRIX")
+    .required(),
+  question_text: Joi.string().min(1).max(500).required(),
+  options: Joi.array().items(Joi.string()).optional(),
+  order_index: Joi.number().integer().optional(),
+  required: Joi.boolean().optional(),
+  ai_prompt: Joi.string().optional(),
+  ai_model: Joi.string().optional(),
+  confidence_score: Joi.number().min(0).max(1).optional(),
+});
+
+export const updateAIGeneratedQuestionValidation = Joi.object({
+  question_type: Joi.string()
+    .valid("TEXT", "MCQ", "RATING", "IMAGE", "VIDEO", "AUDIO", "FILE", "MATRIX")
+    .optional(),
+  question_text: Joi.string().min(1).max(500).optional(),
+  options: Joi.array().items(Joi.string()).optional(),
+  order_index: Joi.number().integer().optional(),
+  required: Joi.boolean().optional(),
+  is_approved: Joi.boolean().optional(),
+  is_added_to_survey: Joi.boolean().optional(),
+});
+
+export const approveAIQuestionValidation = Joi.object({
+  questionIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
 // -------- SHARE --------

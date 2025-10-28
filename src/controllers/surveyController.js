@@ -1,4 +1,8 @@
 import prisma from "../config/db.js";
+import {
+  generateSurveyQuestions,
+  generateFallbackQuestions,
+} from "../utils/openaiService.js";
 
 /**
  * Create a new survey
@@ -14,23 +18,113 @@ export const createSurvey = async (req, res) => {
       status,
       scheduled_date,
       scheduled_type,
+      surveyCategoryId,
+      autoGenerateQuestions,
     } = req.body;
 
     const survey = await prisma.survey.create({
       data: {
         title,
         description,
-        flow_type: flow_type || "STATIC",
+        userId: req.user.id, // comes from JWT middleware
         survey_send_by: survey_send_by || "NONE",
+        flow_type: flow_type || "STATIC",
         settings: settings || {},
         status: status || "DRAFT",
         scheduled_date: scheduled_date || null,
         scheduled_type: scheduled_type || "IMMEDIATE",
-        userId: req.user.id, // comes from JWT middleware
+        surveyCategoryId: surveyCategoryId || null,
+        autoGenerateQuestions: autoGenerateQuestions || false,
       },
     });
 
-    res.status(201).json({ message: "Survey created", survey });
+    let aiGeneratedQuestions = [];
+    let aiGenerationError = null;
+
+    // Generate AI questions if requested
+    if (autoGenerateQuestions) {
+      try {
+        const surveyData = {
+          title,
+          description,
+          categoryOfSurvey,
+        };
+
+        // Try to generate questions using OpenAI
+        const generatedQuestions = await generateSurveyQuestions(surveyData, 5);
+
+        // Save generated questions to database
+        const questionsToCreate = generatedQuestions.map((question, index) => ({
+          surveyId: survey.id,
+          question_type: question.question_type,
+          question_text: question.question_text,
+          options: question.options || [],
+          order_index: index + 1,
+          required: question.required || true,
+          ai_prompt: question.ai_prompt,
+          ai_model: question.ai_model,
+          confidence_score: question.confidence_score,
+        }));
+
+        aiGeneratedQuestions = await prisma.aIGeneratedQuestion.createMany({
+          data: questionsToCreate,
+        });
+
+        // Fetch the created questions to return in response
+        aiGeneratedQuestions = await prisma.aIGeneratedQuestion.findMany({
+          where: { surveyId: survey.id },
+          orderBy: { order_index: "asc" },
+        });
+      } catch (aiError) {
+        console.error("AI Question Generation Error:", aiError);
+        aiGenerationError = aiError.message;
+
+        // Generate fallback questions
+        try {
+          const fallbackQuestions = generateFallbackQuestions(
+            { title, categoryOfSurvey },
+            5
+          );
+
+          const questionsToCreate = fallbackQuestions.map(
+            (question, index) => ({
+              surveyId: survey.id,
+              question_type: question.question_type,
+              question_text: question.question_text,
+              options: question.options || [],
+              order_index: index + 1,
+              required: question.required || true,
+              ai_prompt: question.ai_prompt,
+              ai_model: question.ai_model,
+              confidence_score: question.confidence_score,
+            })
+          );
+
+          await prisma.aIGeneratedQuestion.createMany({
+            data: questionsToCreate,
+          });
+
+          aiGeneratedQuestions = await prisma.aIGeneratedQuestion.findMany({
+            where: { surveyId: survey.id },
+            orderBy: { order_index: "asc" },
+          });
+        } catch (fallbackError) {
+          console.error("Fallback Question Generation Error:", fallbackError);
+        }
+      }
+    }
+
+    const response = {
+      message: "Survey created",
+      survey,
+      ...(autoGenerateQuestions && {
+        aiGeneratedQuestions,
+        ...(aiGenerationError && { aiGenerationWarning: aiGenerationError }),
+      }),
+    };
+    console.log("Create Survey Response:", response);
+
+    res.status(201).json(response);
   } catch (error) {
     console.error("Create Survey Error:", error);
     res.status(500).json({ message: "Server error" });
@@ -45,6 +139,7 @@ export const getSurveys = async (req, res) => {
     const surveys = await prisma.survey.findMany({
       where: { userId: req.user.id, is_deleted: false },
       orderBy: { created_at: "desc" },
+      include: { questions: true },
     });
 
     res.json({ surveys });

@@ -48,6 +48,8 @@ CREATE TABLE "Survey" (
     "scheduled_date" TIMESTAMP(3),
     "scheduled_type" "ScheduleType" NOT NULL DEFAULT 'IMMEDIATE',
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
+    "categoryOfSurvey" TEXT,
+    "autoGenerateQuestions" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -94,7 +96,7 @@ CREATE TABLE "Question" (
     "options" JSONB NOT NULL DEFAULT '[]',
     "media" JSONB NOT NULL DEFAULT '[]',
     "order_index" INTEGER NOT NULL DEFAULT 0,
-    "required" BOOLEAN NOT NULL DEFAULT false,
+    "required" BOOLEAN NOT NULL DEFAULT true,
     "categoryId" TEXT,
     "subCategoryId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -166,6 +168,34 @@ CREATE TABLE "SurveyAudience" (
     CONSTRAINT "SurveyAudience_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "AIGeneratedQuestion" (
+    "id" TEXT NOT NULL,
+    "surveyId" TEXT NOT NULL,
+    "question_type" "QuestionType" NOT NULL,
+    "question_text" TEXT NOT NULL,
+    "options" JSONB NOT NULL DEFAULT '[]',
+    "order_index" INTEGER NOT NULL DEFAULT 0,
+    "required" BOOLEAN NOT NULL DEFAULT true,
+    "ai_prompt" TEXT,
+    "ai_model" TEXT,
+    "confidence_score" DOUBLE PRECISION,
+    "is_approved" BOOLEAN NOT NULL DEFAULT false,
+    "is_added_to_survey" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AIGeneratedQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SurveyCategory" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "SurveyCategory_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -174,6 +204,9 @@ CREATE UNIQUE INDEX "User_mobile_no_key" ON "User"("mobile_no");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "QuestionCategory_type_name_key" ON "QuestionCategory"("type_name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SurveyCategory_name_key" ON "SurveyCategory"("name");
 
 -- AddForeignKey
 ALTER TABLE "Survey" ADD CONSTRAINT "Survey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -204,3 +237,6 @@ ALTER TABLE "ShareToken" ADD CONSTRAINT "ShareToken_surveyId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "SurveyAudience" ADD CONSTRAINT "SurveyAudience_surveyId_fkey" FOREIGN KEY ("surveyId") REFERENCES "Survey"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AIGeneratedQuestion" ADD CONSTRAINT "AIGeneratedQuestion_surveyId_fkey" FOREIGN KEY ("surveyId") REFERENCES "Survey"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
