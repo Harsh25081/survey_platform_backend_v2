@@ -18,6 +18,7 @@ const prepareAnswerData = async (answers) => {
     const type = question.category?.type_name?.toLowerCase() || "text";
 
     let answerValue = null;
+    let scaleRatingValue = null;
     let mediaLinks = [];
     let selectedOptionIds = null;
     let gridAnswers = [];
@@ -33,8 +34,8 @@ const prepareAnswerData = async (answers) => {
       case "multiple choice":
       case "dropdown":
         selectedOptionIds = Array.isArray(a.answer_value)
-          ? a.answer_value[0]
-          : a.answer_value;
+          ? [a.answer_value[0]]
+          : [a.answer_value];
         break;
 
       // ✅ MULTIPLE OPTION TYPES
@@ -49,7 +50,8 @@ const prepareAnswerData = async (answers) => {
       case "rating":
         // You can store either numeric rating or optionId.
         selectedOptionIds = a.optionId || null;
-        if (!selectedOptionIds) answerValue = Number(a.answer_value) || null;
+        if (!selectedOptionIds)
+          scaleRatingValue = Number(a.answer_value) || null;
         break;
 
       // ✅ GRID QUESTION TYPES
@@ -97,6 +99,7 @@ const prepareAnswerData = async (answers) => {
       answer_value: answerValue,
       media: mediaLinks,
       selected_option_ids: selectedOptionIds,
+      scaleRatingValue,
       gridAnswers,
     });
   }
@@ -123,10 +126,11 @@ const createSurveyResponse = async (surveyId, user_metadata, answers) => {
         data: {
           responseId: response.id,
           questionId: ans.questionId,
-          answer_type: ans.answer_type,
-          answer_value: ans.answer_value,
-          media: ans.media,
+          // answer_type: ans.answer_type,
+          answer_value: JSON.stringify(ans.answer_value),
+          // media: ans.media,
           selected_option_ids: ans.selected_option_ids,
+          scaleRatingValue: ans.scaleRatingValue,
         },
       });
 

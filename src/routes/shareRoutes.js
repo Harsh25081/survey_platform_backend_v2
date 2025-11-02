@@ -7,9 +7,9 @@ import { shareSurvey, validateToken } from "../controllers/shareController.js";
 const router = express.Router();
 
 // Protected routes
-router.use(protect);
+// router.use(protect);
 
-router.post("/", validateRequest(shareSurveyValidation), shareSurvey);
+router.post("/", protect, validateRequest(shareSurveyValidation), shareSurvey);
 router.get("/validate/:token", validateToken);
 
 export default router;

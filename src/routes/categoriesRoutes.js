@@ -10,14 +10,14 @@ import {
 const router = express.Router();
 
 // Protected routes
-router.use(protect);
+// router.use(protect);
 
 // for survey Categories
-router.post("/createSurveyCategory", createSurveyCategory);
-router.get("/getSurveyCategory", getSurveyCategories);
+router.post("/createSurveyCategory", protect, createSurveyCategory);
+router.get("/getSurveyCategory", protect, getSurveyCategories);
 
 // for question Categories
-router.post("/createQuestionCategory", createQuestionCategory);
+router.post("/createQuestionCategory", protect, createQuestionCategory);
 router.get("/getQuestionCategory", getQuestionCategories);
 
 export default router;

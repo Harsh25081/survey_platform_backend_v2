@@ -100,8 +100,10 @@ export const createResponseValidation = Joi.object({
     .items(
       Joi.object({
         questionId: Joi.string().uuid().required(),
-        answer_type: Joi.string().required(),
-        answer_value: Joi.string().allow(null, ""),
+        // answer_type: Joi.string().required(),
+        answer_value: Joi.alternatives()
+          .try(Joi.string().allow(null, ""), Joi.number(), Joi.array())
+          .allow(null, ""), // explicitly allow null or empty string
         media: Joi.array()
           .items(Joi.object({ type: Joi.string(), url: Joi.string() }))
           .optional(),
