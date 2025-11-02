@@ -16,12 +16,22 @@ import {
 const router = express.Router();
 
 // All routes protected with JWT
-router.use(protect);
+// router.use(protect);
 
-router.post("/", validateRequest(createSurveyValidation), createSurvey);
-router.get("/", getSurveys);
+router.post(
+  "/",
+  protect,
+  validateRequest(createSurveyValidation),
+  createSurvey
+);
+router.get("/", protect, getSurveys);
 router.get("/:id", getSurveyById);
-router.put("/:id", validateRequest(updateSurveyValidation), updateSurvey);
-router.delete("/:id", deleteSurvey);
+router.put(
+  "/:id",
+  protect,
+  validateRequest(updateSurveyValidation),
+  updateSurvey
+);
+router.delete("/:id", protect, deleteSurvey);
 
 export default router;

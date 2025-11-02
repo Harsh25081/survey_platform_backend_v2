@@ -4,6 +4,7 @@ import {
   getQuestionsBySurvey,
   updateQuestion,
   deleteQuestion,
+  getQuestions,
 } from "../controllers/questionController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -14,11 +15,22 @@ import {
 import validateRequest from "../middleware/validateRequest.js";
 
 const router = express.Router();
-router.use(protect);
+// router.use(protect);
 
-router.post("/", validateRequest(createQuestionValidation), createQuestion);
+router.post(
+  "/",
+  protect,
+  validateRequest(createQuestionValidation),
+  createQuestion
+);
 router.get("/survey/:surveyId", getQuestionsBySurvey);
-router.put("/:id", validateRequest(updateQuestionValidation), updateQuestion);
-router.delete("/:id", deleteQuestion);
+router.get("/", getQuestions);
+router.put(
+  "/:id",
+  protect,
+  validateRequest(updateQuestionValidation),
+  updateQuestion
+);
+router.delete("/:id", protect, deleteQuestion);
 
 export default router;

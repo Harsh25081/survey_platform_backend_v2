@@ -12,7 +12,7 @@ import {
 } from "../validations/validationSchemas.js";
 
 const router = express.Router();
-router.use(protect);
+// router.use(protect);
 
 // Token-based response submission
 router.post(
@@ -21,6 +21,6 @@ router.post(
   submitResponseWithToken
 );
 router.post("/", validateRequest(createResponseValidation), submitResponse);
-router.get("/survey/:surveyId", getResponsesBySurvey);
+router.get("/survey/:surveyId", protect, getResponsesBySurvey);
 
 export default router;

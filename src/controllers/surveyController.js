@@ -157,7 +157,8 @@ export const getSurveyById = async (req, res) => {
     const { id } = req.params;
 
     const survey = await prisma.survey.findFirst({
-      where: { id, userId: req.user.id, is_deleted: false },
+      where: { id, is_deleted: false },
+      include: { questions: true },
     });
 
     if (!survey) return res.status(404).json({ message: "Survey not found" });

@@ -175,22 +175,224 @@ export const getQuestionsBySurvey = async (req, res) => {
   }
 };
 
+export const getQuestions = async (req, res) => {
+  try {
+    const { id, surveyId } = req.query;
+
+    if (!id && !surveyId)
+      return res
+        .status(400)
+        .json({ message: "Please provide question id or surveyId" });
+
+    let questions;
+
+    if (id) {
+      questions = await prisma.question.findUnique({
+        where: { id },
+        include: {
+          options: {
+            include: { mediaAsset: true },
+          },
+          rowOptions: {
+            include: { mediaAsset: true },
+          },
+          columnOptions: {
+            include: { mediaAsset: true },
+          },
+          mediaAsset: true,
+          category: true,
+        },
+      });
+    } else if (surveyId) {
+      questions = await prisma.question.findMany({
+        where: { surveyId },
+        orderBy: { order_index: "asc" },
+        include: {
+          options: {
+            include: { mediaAsset: true },
+          },
+          rowOptions: {
+            include: { mediaAsset: true },
+          },
+          columnOptions: {
+            include: { mediaAsset: true },
+          },
+          mediaAsset: true,
+          category: true,
+        },
+      });
+
+      questions = questions.map((question) => {
+        const obj = { ...question };
+        if (question.rowOptions.length > 0)
+          obj.options = [
+            {
+              rowOptions: question.rowOptions,
+              columnOptions: question.columnOptions,
+            },
+          ];
+        return obj;
+      });
+    }
+
+    if (!questions)
+      return res.status(404).json({ message: "Question(s) not found" });
+
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error("Get Questions Error:", error);
+    res.status(500).json({
+      message: "Server error while fetching questions",
+      error: error.message,
+    });
+  }
+};
+
 /**
  * Update question
  */
+
 export const updateQuestion = async (req, res) => {
   try {
     const { id } = req.params;
+    const {
+      question_type,
+      question_text,
+      order_index,
+      required,
+      categoryId,
+      mediaId,
+      options = [],
+    } = req.body;
 
-    const question = await prisma.question.update({
+    const question = await prisma.question.findUnique({ where: { id } });
+    if (!question)
+      return res.status(404).json({ message: "Question not found" });
+
+    // Step 1: Update question
+    const updatedQuestion = await prisma.question.update({
       where: { id },
-      data: req.body,
+      data: {
+        question_type,
+        question_text,
+        order_index,
+        required,
+        categoryId,
+        mediaId,
+      },
     });
 
-    res.json({ message: "Question updated", question });
+    // Step 2: Delete old options
+    await prisma.option.deleteMany({
+      where: { questionId: id },
+    });
+
+    // Step 3: Recreate options (similar logic as create API)
+    let optionRecords = [];
+    if (options.length > 0) {
+      const category = await prisma.questionCategory.findUnique({
+        where: { id: categoryId },
+        select: { type_name: true },
+      });
+
+      const categoryType = category?.type_name?.toLowerCase();
+
+      switch (categoryType) {
+        case "short answer":
+        case "paragraph":
+          optionRecords = options.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+          }));
+          break;
+
+        case "multiple choice":
+        case "checkboxes":
+        case "dropdown":
+          optionRecords = options.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+            mediaId: opt.mediaId || null,
+          }));
+          break;
+
+        case "linear scale":
+        case "rating":
+          if (options[0]) {
+            const scale = options[0];
+            optionRecords.push({
+              questionId: id,
+              rangeFrom: scale.rangeFrom,
+              rangeTo: scale.rangeTo,
+              fromLabel: scale.fromLabel,
+              toLabel: scale.toLabel,
+              icon: scale.icon,
+            });
+          }
+          break;
+
+        case "multi-choice grid":
+        case "checkbox grid":
+          const { rowOptions = [], columnOptions = [] } = options[0] || {};
+          const rowOptionRecords = rowOptions.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+            rowQuestionOptionId: id,
+          }));
+          const columnOptionRecords = columnOptions.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+            columnQuestionOptionId: id,
+          }));
+          optionRecords = [...rowOptionRecords, ...columnOptionRecords];
+          break;
+
+        case "file upload":
+          optionRecords = options.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+            mediaId: opt.mediaId || null,
+          }));
+          break;
+
+        case "date":
+        case "time":
+          optionRecords = options.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+          }));
+          break;
+
+        default:
+          optionRecords = options.map((opt) => ({
+            text: opt.text || "",
+            questionId: id,
+          }));
+          break;
+      }
+
+      if (optionRecords.length > 0) {
+        await prisma.option.createMany({
+          data: optionRecords,
+        });
+      }
+    }
+
+    const finalQuestion = await prisma.question.findUnique({
+      where: { id },
+      include: { options: true, mediaAsset: true, category: true },
+    });
+
+    res.status(200).json({
+      message: "Question updated successfully",
+      question: finalQuestion,
+    });
   } catch (error) {
     console.error("Update Question Error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      message: "Server error while updating question",
+      error: error.message,
+    });
   }
 };
 
@@ -200,6 +402,10 @@ export const updateQuestion = async (req, res) => {
 export const deleteQuestion = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const question = await prisma.question.findUnique({ where: { id } });
+    if (!question)
+      return res.status(404).json({ message: "Question not found" });
 
     await prisma.option.deleteMany({
       where: { questionId: id },

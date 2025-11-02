@@ -27,7 +27,11 @@ export const shareSurvey = async (req, res) => {
       });
       shareTokens.push(token);
       const publicLink = `${process.env.FRONTEND_URL}/survey/${token.token_hash}`;
-      return res.json({ message: "Survey shared publicly", link: publicLink });
+      return res.json({
+        message: "Survey shared publicly",
+        shareLink: publicLink,
+        shareCode: token.token_hash,
+      });
     }
 
     // Personalized sharing
