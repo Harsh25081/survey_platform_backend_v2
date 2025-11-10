@@ -139,7 +139,7 @@ export const getSurveys = async (req, res) => {
     const surveys = await prisma.survey.findMany({
       where: { userId: req.user.id, is_deleted: false },
       orderBy: { created_at: "desc" },
-      include: { questions: true },
+      include: { questions: true, share_tokens: true },
     });
 
     res.json({ surveys });

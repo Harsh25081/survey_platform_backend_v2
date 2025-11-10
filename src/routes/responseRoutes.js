@@ -3,6 +3,8 @@ import {
   submitResponse,
   getResponsesBySurvey,
   submitResponseWithToken,
+  getSurveyResults,
+  getSurveyAnalytics,
 } from "../controllers/responseController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import validateRequest from "../middleware/validateRequest.js";
@@ -21,6 +23,8 @@ router.post(
   submitResponseWithToken
 );
 router.post("/", validateRequest(createResponseValidation), submitResponse);
+// router.get("/surveys/:surveyId/results", protect, getSurveyResults);
+router.get("/surveys/:surveyId/results", protect, getSurveyAnalytics);
 router.get("/survey/:surveyId", protect, getResponsesBySurvey);
 
 export default router;

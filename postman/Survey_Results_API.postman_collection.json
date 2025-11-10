@@ -1,0 +1,223 @@
+{
+  "info": {
+    "name": "Survey Results API",
+    "description": "API endpoints for survey results, analytics, and filtering",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Survey Results",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}?page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "startDate",
+              "value": "2024-01-01",
+              "disabled": true
+            },
+            {
+              "key": "endDate",
+              "value": "2024-12-31",
+              "disabled": true
+            },
+            {
+              "key": "sortBy",
+              "value": "created_at",
+              "disabled": true
+            },
+            {
+              "key": "sortOrder",
+              "value": "desc",
+              "disabled": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Survey Results Summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/summary",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "summary"]
+        }
+      }
+    },
+    {
+      "name": "Get Question Results",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/questions/{{question_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "questions", "{{question_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Export Results (JSON)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/export?format=json",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "export"],
+          "query": [
+            {
+              "key": "format",
+              "value": "json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Export Results (CSV)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/export?format=csv",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "export"],
+          "query": [
+            {
+              "key": "format",
+              "value": "csv"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Response Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/responses/{{response_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "responses", "{{response_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Filtered Responses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/survey-results/{{survey_id}}/filtered?questionId={{question_id}}&answerValue=Very%20satisfied&page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "survey-results", "{{survey_id}}", "filtered"],
+          "query": [
+            {
+              "key": "questionId",
+              "value": "{{question_id}}"
+            },
+            {
+              "key": "answerValue",
+              "value": "Very satisfied"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "auth_token",
+      "value": "your_jwt_token_here"
+    },
+    {
+      "key": "survey_id",
+      "value": "survey-123"
+    },
+    {
+      "key": "question_id",
+      "value": "question-1"
+    },
+    {
+      "key": "response_id",
+      "value": "response-1"
+    }
+  ]
+}
+
